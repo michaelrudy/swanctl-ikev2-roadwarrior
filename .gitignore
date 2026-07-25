@@ -1,0 +1,32 @@
+# --- Secrets: NEVER commit -----------------------------------------------
+# Live config: holds the EAP password and your real hostname.
+vpn.conf
+
+# Generated CA/server material and client bundles produced by install.sh.
+generated/
+
+# Keys and certs, wherever they land.
+*.pem
+*.key
+*.crt
+*.p12
+*.pfx
+*.mobileconfig
+
+# --- Work in progress -----------------------------------------------------
+# Docs are being reworked locally. Not published yet.
+docs/
+
+# --- OS / editor cruft ----------------------------------------------------
+.DS_Store
+._*
+.Spotlight-V100
+.Trashes
+Thumbs.db
+*.swp
+*~
+.vscode/
+.idea/
+
+# --- Runtime --------------------------------------------------------------
+*.log

@@ -1,0 +1,49 @@
+# vpn.conf — copy to vpn.conf and edit before running scripts/install.sh
+#
+#   cp vpn.conf.example vpn.conf
+#   nano vpn.conf
+#
+# vpn.conf is git-ignored because it holds a password. Never commit it.
+
+# --- Identity -----------------------------------------------------------------
+# Public DNS name clients connect to (your dynamic-DNS hostname).
+# The server cert's CN and SAN are built from this — it MUST be exact.
+VPN_DNS_NAME="vpn.example.com"
+
+# --- Network interfaces -------------------------------------------------------
+# The interface carrying your default route. Find it with:
+#   ip route | grep default
+# Commonly eth0, but a bridged host uses br0 (that's what the reference box used).
+WAN_IFACE="br0"
+
+# Your LAN subnet — used to allow SSH/admin from the local network.
+LAN_SUBNET="192.168.1.0/24"
+
+# --- VPN client addressing ----------------------------------------------------
+# Pool handed to clients. Must NOT overlap your LAN or another VPN.
+VPN_POOL="10.10.10.0/24"
+
+# DNS servers pushed to clients (comma-separated).
+DNS_SERVERS="1.1.1.1, 8.8.8.8"
+
+# Tunnel scope:
+#   0.0.0.0/0        = full tunnel (all client traffic via home)
+#   192.168.1.0/24   = split tunnel (only reach your LAN)
+LOCAL_TS="0.0.0.0/0"
+
+# --- Credentials --------------------------------------------------------------
+# EAP username/password the client types in. Invented here — not a Linux account.
+VPN_USER="vpnuser"
+VPN_PASSWORD="CHANGE_ME_to_a_strong_password"
+
+# --- Fragmentation (DO NOT DISABLE) -------------------------------------------
+# Forces IKE-level fragmentation of the cert-bearing AUTH packet. Without this,
+# iOS and Windows clients behind NAT silently fail to connect. 1280 is proven.
+# See the README for the full diagnosis.
+FRAGMENT_SIZE="1280"
+
+# --- Firewall -----------------------------------------------------------------
+SSH_PORT="22"
+# Admin services allowed ONLY from LAN + VPN pool (space-separated tcp ports).
+# Example covers SSH (22), RDP/xrdp (3389), Cockpit (9090).
+ADMIN_PORTS="22 3389 9090"
