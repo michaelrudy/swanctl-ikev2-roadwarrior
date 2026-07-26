@@ -52,6 +52,8 @@ fi
 echo; echo "6. Firewall"
 ufw status 2>/dev/null | grep -q "Status: active" && ok "ufw active" || warn "ufw not active"
 ufw status 2>/dev/null | grep -q "500,4500/udp" && ok "500,4500/udp allowed" || warn "500,4500/udp not in ufw"
+ufw status 2>/dev/null | grep -qi "esp" && ok "bare ESP allowed" \
+  || warn "ESP (proto 50) not allowed — un-NATed clients will connect but pass no traffic"
 
 echo; echo "7. Active tunnels"
 echo "     $(swanctl --list-sas 2>/dev/null | grep -c ESTABLISHED) established SA(s)"

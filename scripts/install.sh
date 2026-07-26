@@ -180,6 +180,11 @@ sed -i 's/^DEFAULT_FORWARD_POLICY=.*/DEFAULT_FORWARD_POLICY="ACCEPT"/' /etc/defa
 ufw allow from "${LAN_SUBNET}" to any port "${SSH_PORT}" proto tcp >/dev/null
 ufw allow from "${VPN_POOL}"   to any port "${SSH_PORT}" proto tcp >/dev/null
 ufw allow 500,4500/udp >/dev/null
+# Clients behind NAT wrap ESP in UDP 4500, which the rule above covers. Clients
+# with no NAT in the path send bare ESP (IP protocol 50) instead, and without
+# this rule those packets hit ufw's default deny. IKE still completes on 4500,
+# so the tunnel comes up and looks healthy while carrying no traffic at all.
+ufw allow proto esp from any to any >/dev/null
 for p in $ADMIN_PORTS; do
   [[ "$p" == "$SSH_PORT" ]] && continue
   ufw allow from "${LAN_SUBNET}" to any port "$p" proto tcp >/dev/null
