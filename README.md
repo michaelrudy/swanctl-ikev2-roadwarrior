@@ -20,12 +20,24 @@ won't match what's on a current Ubuntu box.
 ```bash
 git clone https://github.com/michaelrudy/swanctl-ikev2-roadwarrior
 cd swanctl-ikev2-roadwarrior
+python3 -m vpnsetup            # asks a few questions, writes vpn.conf
+sudo ./scripts/install.sh
+```
+
+The wizard reads your routing table to fill in what it can, checks the answers
+against each other, and flags the problems listed below before you hit them.
+It only writes `vpn.conf`; `install.sh` still does the work. Python 3 is
+already on Ubuntu Server, so there's nothing to install.
+
+By hand instead:
+
+```bash
 cp vpn.conf.example vpn.conf
 nano vpn.conf                 # DNS name, interface, subnet, password
 sudo ./scripts/install.sh
 ```
 
-The installer prints what's left to do. Then run the health check:
+Either way, the installer prints what's left to do. Then run the health check:
 
 ```bash
 sudo ./scripts/diagnose.sh
@@ -112,10 +124,13 @@ The server can't do these for you.
    that means importing it and then turning on full trust, which are two
    separate steps. On Windows it goes into the Local Machine trusted root store.
 
+The wizard checks 2 and 3 for you. It can't do anything about 1 or 4.
+
 ## Repo layout
 
 ```
 vpn.conf.example              # copy to vpn.conf and edit; vpn.conf is gitignored
+vpnsetup/                     # the setup wizard: python3 -m vpnsetup
 scripts/
   install.sh                  # fresh install
   add-client.sh               # add a user
@@ -124,7 +139,8 @@ scripts/
   rollback-to-ipsecconf.sh    # put it back if the migration goes badly
 ```
 
-Every script reads `vpn.conf`. Nothing else needs editing.
+Every script reads `vpn.conf`. Nothing else needs editing. The wizard writes
+that file and nothing else, so the two halves stay independent.
 
 ## Day-to-day
 
@@ -144,6 +160,13 @@ Watch a client connect:
 
 ```bash
 sudo journalctl -u strongswan -f
+```
+
+After changing a bridge, a NIC, or your DNS, this re-reads `vpn.conf` and
+compares it against what the machine actually looks like now:
+
+```bash
+python3 -m vpnsetup --check
 ```
 
 Coming from `ipsec.conf`, run `scripts/migrate-from-ipsecconf.sh`. It reads the
