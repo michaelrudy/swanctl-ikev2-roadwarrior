@@ -160,6 +160,11 @@ echo "[6/9] Firewall (ufw) + NAT..."
 systemctl disable netfilter-persistent 2>/dev/null || true
 apt-get purge -y -qq iptables-persistent 2>/dev/null || true
 
+ufw --force reset >/dev/null
+
+# The reset above restores the stock before.rules, so the NAT block has to be
+# written after it, not before. Otherwise the rule is silently discarded and
+# full-tunnel clients connect but get no internet.
 BR="/etc/ufw/before.rules"
 MB="# BEGIN swanctl-ikev2-roadwarrior NAT"; ME="# END swanctl-ikev2-roadwarrior NAT"
 grep -q "$MB" "$BR" && sed -i "/${MB}/,/${ME}/d" "$BR"
@@ -172,7 +177,6 @@ ${ME}"
 printf '%s\n%s\n' "$NAT_BLOCK" "$(cat "$BR")" > "$BR"
 sed -i 's/^DEFAULT_FORWARD_POLICY=.*/DEFAULT_FORWARD_POLICY="ACCEPT"/' /etc/default/ufw
 
-ufw --force reset >/dev/null
 ufw allow from "${LAN_SUBNET}" to any port "${SSH_PORT}" proto tcp >/dev/null
 ufw allow from "${VPN_POOL}"   to any port "${SSH_PORT}" proto tcp >/dev/null
 ufw allow 500,4500/udp >/dev/null
